@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import Spotify from 'spotify-web-api-js';
-import Chart from './components/Chart.js'
+import Chart from './components/Chart.js';
+import Item from './components/Item';
 import {isBrowser, isMobile} from "react-device-detect";
 import getAverageColor from 'get-average-color';
 
@@ -34,7 +35,7 @@ class App extends Component {
       aboutDisplay: 'about',
       containerDisplay: "hidden",
       loginDisplay: "button",
-      headerDisplay: "App-header",
+      headerDisplay: "hidden",
       showcaseDisplay: "hidden",
       backgroundColor:  "white",
       chartDisplay: "hidden",
@@ -80,17 +81,6 @@ class App extends Component {
         }
       }
     }
-
-    if(isMobile) {
-      console.log('detected mobile device')
-      this.setState ={
-        chartHeight: mobileChartHeight
-      }
-    }
-
-    else {
-      console.log('detected browser')
-    }
     
     if(params.access_token) {
       spotifyWebApi.setAccessToken(params.access_token);
@@ -98,7 +88,8 @@ class App extends Component {
     }
 
     this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
-    
+
+
     this.getUserInfo()
     this.getTopArtists()
     this.getTopTracks()
@@ -106,7 +97,7 @@ class App extends Component {
     
   }
 
-  getHashParams() {
+  getHashParams = () => {
     var hashParams = {};
     console.log(window.location.hash.substring(1));
     var e, r = /([^&;=]+)=?([^&;]*)/g,
@@ -118,16 +109,16 @@ class App extends Component {
     
   }
 
-  getUserInfo() {
+  getUserInfo = () => {
     spotifyWebApi.getMe().then(user => {
       var name = user.display_name.split(" ");
       this.setState({
         userFirstname: name[0]
       })
-    })
+    });
   }
 
-  getTopArtists() {
+  getTopArtists = () => {
     console.log('getting top artists')
     var name_array = [];
     var id_array = [];
@@ -188,12 +179,13 @@ class App extends Component {
           chartDisplay: "chart",
           loginDisplay: "hidden",
           aboutDisplay: "hidden",
-          showcaseDisplay: "showcase"
+          showcaseDisplay: "showcase",
+          headerDisplay: "showcase-header"
         })
       })
   }
 
-  getTopTracks() {
+  getTopTracks = () => {
     console.log('getting top tracks')
     var name_array = [];
     var artist_array = [];
@@ -280,39 +272,40 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App" style={{backgroundColor: "white"}}>
+      <div className="App">
         
-        <div className="App-title">{this.state.userFirstname}'s January Favourites</div>
+        <div className="App-title">{this.state.userFirstname}'s <br/>January <br/>Favourites</div>
           
         <a className= {this.state.loginDisplay} href='http://localhost:8888/login'>
           <button className="login">Generate</button>
         </a>
-
-        <div className={this.state.showcaseDisplay}>
-          <div className="showcase-item" onClick={() => this.changeBackgroundColor(0)}>
-            <img className="showcaseImg" src={this.state.topArtists.albumImgs[0]}></img>
-            <p>{this.state.topArtists.names[0]}</p>
+        <div className="content">
+          <div className={this.state.showcaseDisplay}>
+            <Item itemRank={1}
+                  itemImage={this.state.topTracks.albumImgs[0]} 
+                  itemName={this.state.topTracks.names[0]}
+                  itemSubName={this.state.topTracks.artist[0]} />
+            <Item itemRank={2} 
+                  itemImage={this.state.topTracks.albumImgs[1]} 
+                  itemName={this.state.topTracks.names[1]}
+                  itemSubName={this.state.topTracks.artist[1]} />
+            <Item itemRank={3} 
+                  itemImage={this.state.topTracks.albumImgs[2]} 
+                  itemName={this.state.topTracks.names[2]}
+                  itemSubName={this.state.topTracks.artist[2]} />
+            <Item itemRank={4} 
+                  itemImage={this.state.topTracks.albumImgs[3]} 
+                  itemName={this.state.topTracks.names[3]}
+                  itemSubName={this.state.topTracks.artist[3]} />
+            <Item itemRank={5} 
+                  itemImage={this.state.topTracks.albumImgs[4]} 
+                  itemName={this.state.topTracks.names[4]}
+                  itemSubName={this.state.topTracks.artist[4]} />
           </div>
-          <div className="showcase-item" onClick={() => this.changeBackgroundColor(1)}>
-            <img className="showcaseImg" src={this.state.topArtists.albumImgs[1]}></img>
-            <p>{this.state.topArtists.names[1]}</p>
-          </div>
-          <div className="showcase-item" onClick={() => this.changeBackgroundColor(2)}>
-            <img className="showcaseImg" src={this.state.topArtists.albumImgs[2]}></img>
-            <p>{this.state.topArtists.names[2]}</p>
-          </div>
-          <div className="showcase-item" onClick={() => this.changeBackgroundColor(3)}>
-            <img className="showcaseImg" src={this.state.topArtists.albumImgs[3]}></img>
-            <p>{this.state.topArtists.names[3]}</p>
-          </div>
-          <div className="showcase-item" onClick={() => this.changeBackgroundColor(4)}>
-            <img className="showcaseImg" src={this.state.topArtists.albumImgs[4]}></img>
-            <p>{this.state.topArtists.names[4]}</p>
-          </div>
-        </div>
+        
 
         <div className="footer"></div>
-        
+        </div>
       </div>
     
     );
