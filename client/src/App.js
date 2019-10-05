@@ -30,6 +30,7 @@ class App extends Component {
     super();
     const params = this.getHashParams();
     this.state ={
+      month: new Date().toLocaleString('default', { month: 'long' }),
       loggedIn: params.access_token ? true : false,
       timeRange: 'short_term',
       aboutDisplay: 'about',
@@ -86,7 +87,6 @@ class App extends Component {
       spotifyWebApi.setAccessToken(params.access_token);
       console.log(params.access_token);
     }
-
     this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
 
 
@@ -274,10 +274,10 @@ class App extends Component {
     return (
       <div className="App">
         
-        <div className="App-title">{this.state.userFirstname}'s <br/>January <br/>Favourites</div>
+        <div className="App-title">{this.state.userFirstname == '' ? 'Your' : this.state.userFirstname + '\'s'} <br/>{this.state.month} <br/>Favourites</div>
           
-        <a className= {this.state.loginDisplay} href='http://localhost:8888/login'>
-          <button className="login">Generate</button>
+        <a className={this.state.loginDisplay} href='https://statifyforspotify-backend.herokuapp.com/login'>
+          <button className="btn btn-primary">Generate</button>
         </a>
         <div className="content">
           <div className={this.state.showcaseDisplay}>
