@@ -260,7 +260,7 @@ class App extends Component {
         
         <div className="App-title">{this.state.userFirstname == '' ? 'Generate Your' : this.state.userFirstname + '\'s'} <br/>{this.state.month} <br/>Favourites</div>
           
-        <a className={this.state.loginDisplay} href='http://localhost:8888/login'>
+        <a className={this.state.loginDisplay} href='https://statifyforspotify-backend.herokuapp.com/login'>
           <button className="btn btn-primary">Generate</button>
         </a>
         <div className="content">
