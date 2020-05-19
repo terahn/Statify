@@ -14,8 +14,8 @@ var cookieParser = require('cookie-parser');
 
 var client_id = '86c9f7a39dc449bc84cfa8922742a85d'; // Your client id
 var client_secret = 'fdd640f620ae41b1b8555f531378bc49'; // Your secret
-var redirect_uri = 'https://statifyforspotify-backend.herokuapp.com/callback'; // Your redirect uri FOR DEPLOYMENT
-//var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri FOR TESTING
+//var redirect_uri = 'https://statifyforspotify-backend.herokuapp.com/callback'; // Your redirect uri FOR DEPLOYMENT
+var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri FOR TESTING
 
 /**
  * Generates a random string containing numbers and letters
@@ -103,8 +103,8 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        redirect_url = 'https://statifyforspotify.herokuapp.com/#'
-        //redirect_url = 'http://localhost:3000/#'
+        //redirect_url = 'https://statifyforspotify.herokuapp.com/#'
+        redirect_url = 'http://localhost:3000/#'
         
         res.redirect(redirect_url +
           querystring.stringify({
