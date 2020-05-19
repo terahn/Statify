@@ -1,0 +1,19 @@
+.genre-item {
+    height: 60px;
+    padding-bottom: 25px;
+    align-items: center;
+}
+
+.genre-name {
+    width: 10%;
+    margin-right: 25px;
+    font-weight: 300;
+    font-size: 27px;
+    text-align: left;
+    padding-bottom: 5px;
+}
+
+.genre-value {
+    height: 25px;
+    background-color: black;
+}

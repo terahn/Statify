@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import Spotify from 'spotify-web-api-js';
-import Chart from './components/Chart.js';
 import Item from './components/Item';
-import {isBrowser, isMobile} from "react-device-detect";
+import Genre from './components/Genre';
 import getAverageColor from 'get-average-color';
 
 const spotifyWebApi = new Spotify();
@@ -38,6 +37,7 @@ class App extends Component {
       loginDisplay: "button",
       headerDisplay: "hidden",
       showcaseDisplay: "hidden",
+      tastesDisplay: "hidden",
       backgroundColor:  "white",
       chartDisplay: "hidden",
       chartHeight: browserChartHeight,
@@ -59,28 +59,8 @@ class App extends Component {
       avgBPM: 0,
       topGenres: [],
       initialDataReceived: false,
-      chartData: {
-        labels: ["Pop", "Country", "Classical", "Electronic", "Indie", "Rock", "Jazz", "R&B/Soul", "Hip-Hop"],
-        datasets: [
-          {
-            label: "Genres",
-            fillColor: "rgba(29,185,84,1)",
-            backgroundColor: "rgba(29,185,84,0.5)",
-            lineTension: 0,
-            data: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-          }
-        ]
-      },
-      chartOptions: {
-        maintainAspectRatio: true,
-        responsive: true,
-        scale: {
-          display: true
-        },
-        labels: {
-          fontColor: 'red'
-        }
-      }
+      genreData: [],
+      genreLabels: ["Pop", "Country", "Classical", "Electronic", "Indie", "Rock", "Jazz", "R&B/Soul", "Hip-Hop"]
     }
     
     if(params.access_token) {
@@ -163,24 +143,13 @@ class App extends Component {
             topGenres: genre_array,
             colors: color_array
           },
-          chartData: {
-            datasets: [{
-              label: "Genres",
-              data: genre_data,
-              fillColor: "rgba(255, 102, 255,1)",
-              defaultFontSize: 20
-            }]
-          },
-          chartOptions: {
-            scale: {
-              display: true
-            }
-          },
+          genreData: genre_data,
           chartDisplay: "chart",
           loginDisplay: "hidden",
           aboutDisplay: "hidden",
           showcaseDisplay: "showcase",
-          headerDisplay: "showcase-header"
+          headerDisplay: "showcase-header",
+          tastesDisplay: "App-title"
         })
       })
   }
@@ -235,6 +204,7 @@ class App extends Component {
   }
 
   genreChartMaker(genres) {
+    console.log(genres)
     var genreCheckbox = [0, 0, 0, 0, 0, 0, 0, 0, 0];
     for(var i = 0; i < genres.length; i++) {
       //check each genre against the genre keywords. Tick the genreCheckBox if applicable. Once done, update state's genre data
@@ -251,7 +221,8 @@ class App extends Component {
     return genreCheckbox;
   }
 
-  changeTerm(term) {
+  changeTerm = (event) => {
+    let term = event.target.value
     console.log('changing term to ' + term)
     this.setState({
       timeRange: term
@@ -270,13 +241,26 @@ class App extends Component {
     });
   }
 
+  renderGenreData = () => {
+    let genreData = this.state.genreData
+    let indexed = genreData.map((x, idx) => {
+      return {label: this.state.genreLabels[idx], val: x}
+    })
+    indexed.sort((x, y) => {return x.val < y.val ? 1 : x.val == y.val ? 0 : -1});
+    let top = indexed.slice(0,5)
+
+    return top.map((x, idx) => {
+      return <Genre label={x.label} value={x.val} key={idx}></Genre>
+    })
+  }
+
   render() {
     return (
       <div className="App">
         
-        <div className="App-title">{this.state.userFirstname == '' ? 'Your' : this.state.userFirstname + '\'s'} <br/>{this.state.month} <br/>Favourites</div>
+        <div className="App-title">{this.state.userFirstname == '' ? 'Generate Your' : this.state.userFirstname + '\'s'} <br/>{this.state.month} <br/>Favourites</div>
           
-        <a className={this.state.loginDisplay} href='https://statifyforspotify-backend.herokuapp.com/login'>
+        <a className={this.state.loginDisplay} href='http://localhost:8888/login'>
           <button className="btn btn-primary">Generate</button>
         </a>
         <div className="content">
@@ -303,7 +287,8 @@ class App extends Component {
                   itemSubName={this.state.topTracks.artist[4]} />
           </div>
         
-
+          <div className={this.state.tastesDisplay}>Your Tastes</div>
+          <div className="genre">{this.renderGenreData()}</div>
         <div className="footer"></div>
         </div>
       </div>
