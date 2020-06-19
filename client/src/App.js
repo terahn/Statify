@@ -1,217 +1,234 @@
 import React, { Component } from 'react';
 import './App.css';
 import Spotify from 'spotify-web-api-js';
+import { Graph } from 'react-d3-graph';
 import Item from './components/Item';
 import Genre from './components/Genre';
-import getAverageColor from 'get-average-color';
+import {
+  graphConfig,
+  graphHeight,
+  graphWidth,
+} from './components/Graph.config';
 
 const spotifyWebApi = new Spotify();
 
 const genreKeywords = [
-['pop'],
-['country'],
-['classical', 'soundtrack'],
-['bass', 'chillwave', 'future', 'tronic', 'house', 'rave', 'dub', 'dance', 'trap', 'vapor', 'techno', 'edm'],
-['indie'],
-['rock', 'punk', 'metal', 'grunge'],
-['jazz', 'bop', 'swing', 'stride'],
-['r&b', 'urban', 'soul', 'funk'],
-['hip hop', 'rap'],
-]
-
-const mobileChartHeight = 200;
-const browserChartHeight = 100;
-
+  ['pop'],
+  ['country'],
+  ['classical', 'soundtrack'],
+  [
+    'bass',
+    'chillwave',
+    'future',
+    'tronic',
+    'house',
+    'rave',
+    'dub',
+    'dance',
+    'trap',
+    'vapor',
+    'techno',
+    'edm',
+  ],
+  ['indie'],
+  ['rock', 'punk', 'metal', 'grunge'],
+  ['jazz', 'bop', 'swing', 'stride'],
+  ['r&b', 'urban', 'soul', 'funk'],
+  ['hip hop', 'rap'],
+];
 
 class App extends Component {
-
   constructor() {
     super();
     const params = this.getHashParams();
-    this.state ={
-      month: new Date().toLocaleString('default', { month: 'long' }),
-      loggedIn: params.access_token ? true : false,
-      timeRange: 'short_term',
-      aboutDisplay: 'about',
-      containerDisplay: "hidden",
-      loginDisplay: "button",
-      headerDisplay: "hidden",
-      showcaseDisplay: "hidden",
-      tastesDisplay: "hidden",
-      backgroundColor:  "white",
-      chartDisplay: "hidden",
-      chartHeight: browserChartHeight,
-      userFirstname: "",
-      userLastname: "",
+    this.state = {
+      timeRange: 'medium_term',
+      loginDisplay: 'button',
+      displayContent: false,
+      userFirstname: '',
       topArtists: {
         names: [],
         ids: [],
         albumImgs: [],
         genres: [],
-        colors: []
       },
       topTracks: {
         names: [],
         artist: [],
         ids: [],
-        albumImgs: []
+        albumImgs: [],
       },
-      avgBPM: 0,
-      topGenres: [],
-      initialDataReceived: false,
       genreData: [],
-      genreLabels: ["Pop", "Country", "Classical", "Electronic", "Indie", "Rock", "Jazz", "R&B/Soul", "Hip-Hop"]
-    }
-    
-    if(params.access_token) {
+      genreLabels: [
+        'Pop',
+        'Country',
+        'Classical',
+        'Electronic',
+        'Indie',
+        'Rock',
+        'Jazz',
+        'R&B/Soul',
+        'Hip-Hop',
+      ],
+      graphData: {
+        nodes: [],
+        links: [],
+      },
+      renderGraph: false,
+    };
+
+    if (params.access_token) {
       spotifyWebApi.setAccessToken(params.access_token);
-      console.log(params.access_token);
     }
-    this.changeBackgroundColor = this.changeBackgroundColor.bind(this);
-
-
-    this.getUserInfo()
-    this.getTopArtists()
-    this.getTopTracks()
-    
-    
+    this.fetchData();
   }
+
+  fetchData = async () => {
+    const name = await this.getUserInfo();
+    const { topTracks } = await this.getTopTracks();
+    const {
+      topArtists,
+      genreData,
+      loginDisplay,
+      displayContent,
+    } = await this.getTopArtists();
+    const graphNodes = await this.buildGraphNodes(topArtists);
+    const graphLinks = await this.buildGraphLinks(topArtists);
+    this.setState((prevState) => ({
+      ...prevState,
+      loginDisplay,
+      displayContent,
+      userFirstname: name[0],
+      topArtists,
+      topTracks,
+      genreData,
+      graphData: {
+        nodes: graphNodes,
+        links: graphLinks,
+      },
+      renderGraph: true,
+    }));
+    setTimeout(() => {
+      this.removeFalseLinks();
+    }, 2000);
+  };
 
   getHashParams = () => {
-    var hashParams = {};
-    console.log(window.location.hash.substring(1));
-    var e, r = /([^&;=]+)=?([^&;]*)/g,
-        q = window.location.hash.substring(1);
-    while ( e = r.exec(q)) {
-       hashParams[e[1]] = decodeURIComponent(e[2]);
+    const hashParams = {};
+    let e;
+    const r = /([^&;=]+)=?([^&;]*)/g;
+    const q = window.location.hash.substring(1);
+    while ((e = r.exec(q))) {
+      hashParams[e[1]] = decodeURIComponent(e[2]);
     }
     return hashParams;
-    
-  }
+  };
 
   getUserInfo = () => {
-    spotifyWebApi.getMe().then(user => {
-      var name = user.display_name.split(" ");
-      this.setState({
-        userFirstname: name[0]
-      })
+    return new Promise((resolve, reject) => {
+      spotifyWebApi
+        .getMe()
+        .then((user) => {
+          const name = user.display_name.split(' ');
+          resolve(name);
+          // this.setState({
+          //   userFirstname: name[0],
+          // });
+        })
+        .catch((error) => reject(error));
     });
-  }
+  };
 
   getTopArtists = () => {
-    console.log('getting top artists')
-    var name_array = [];
-    var id_array = [];
-    var albumImg_array = [];
-    var genre_array = [];
-    var genre_data = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var curr_genre_data = [];
-    var color_array = [];
-    
-    spotifyWebApi.getMyTopArtists({limit: 50, time_range: this.state.timeRange})
-      .then((data) => {
-        for(var i = 0; i < 25; i++) {
-          if(data.items[i] !== undefined) {
-            name_array.push(data.items[i].name)
-            id_array.push(data.items[i].id)
-            albumImg_array.push(data.items[i].images[0].url)
-            genre_array.push(data.items[i].genres)
-            curr_genre_data = this.genreChartMaker(data.items[i].genres)
-            getAverageColor(data.items[i].images[0].url).then(rgb => color_array.push(rgb))
-            for(var j = 0; j < 9; j++) {
-              //update genre data with new data plus a weight depending on how high up on the top artists list they come from
-              if(curr_genre_data[j] !== 0) {
-                genre_data[j] += (curr_genre_data[j] + ((25 - i)/4));
+    const nameArray = [];
+    const idArray = [];
+    const albumImgArray = [];
+    const genreArray = [];
+    const genreData = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let currGenreData = [];
+    const artistLimit = 50;
+    const { timeRange } = this.state;
+
+    return new Promise((resolve, reject) => {
+      spotifyWebApi
+        .getMyTopArtists({
+          limit: artistLimit,
+          time_range: timeRange,
+        })
+        .then((data) => {
+          for (let i = 0; i < artistLimit; i += 1) {
+            if (data.items[i] !== undefined) {
+              nameArray.push(data.items[i].name);
+              idArray.push(data.items[i].id);
+              albumImgArray.push(data.items[i].images[0].url);
+              genreArray.push(data.items[i].genres);
+              currGenreData = this.genreChartMaker(data.items[i].genres);
+              for (let j = 0; j < 9; j += 1) {
+                // update genre data with new data plus a weight depending on how high up on the top artists list they come from
+                if (currGenreData[j] !== 0) {
+                  genreData[j] += currGenreData[j] + (25 - i) / 4;
+                }
               }
             }
           }
-          
 
-          //console.log(name_array[i] + " has genres " + curr_genre_data);
-        }
-        /*
-        console.log(name_array);
-        genre_array = [].concat.apply([],genre_array);
-        console.log(genre_array);
-        */
-        console.log("genre data = " + genre_data);
-        this.setState({
-          topArtists: {
-            names: name_array,
-            ids: id_array,
-            albumImgs: albumImg_array,
-            topGenres: genre_array,
-            colors: color_array
-          },
-          genreData: genre_data,
-          chartDisplay: "chart",
-          loginDisplay: "hidden",
-          aboutDisplay: "hidden",
-          showcaseDisplay: "showcase",
-          headerDisplay: "showcase-header",
-          tastesDisplay: "App-title"
+          resolve({
+            topArtists: {
+              names: nameArray,
+              ids: idArray,
+              albumImgs: albumImgArray,
+              topGenres: genreArray,
+            },
+            genreData,
+            loginDisplay: 'hidden',
+            displayContent: true,
+          });
         })
-      })
-  }
+        .catch((error) => reject(error));
+    });
+  };
 
   getTopTracks = () => {
-    console.log('getting top tracks')
-    var name_array = [];
-    var artist_array = [];
-    var id_array = [];
-    var albumImg_array = [];
-    
-    spotifyWebApi.getMyTopTracks({limit: 50, time_range: this.state.timeRange})
-      .then((data) => {
-        for(var i = 0; i < 50; i++) {
-          if(data.items[i] !== undefined) {
-            name_array.push(data.items[i].name)
-            artist_array.push(data.items[i].artists[0].name)
-            id_array.push(data.items[i].id)
-            albumImg_array.push(data.items[i].album.images[0].url)
-          }
-          
-        }
-
-        this.setState({
-          topTracks: {
-            names: name_array,
-            artist: artist_array,
-            ids: id_array,
-            albumImgs: albumImg_array
-          },
-          initialDataReceived: true
-        })
-
-        //get BPM
-        /*
-        var ids = this.state.topTracks.ids;
-        var bpmSum = 0;
-        spotifyWebApi.getAudioFeaturesForTracks(id_array)
-          .then((data) => {
-            for(var i = 0; i < 50; i++) {
-              if(data.audio_features[i].tempo != null) {
-                bpmSum += data.audio_features[i].tempo
-              }
+    const nameArray = [];
+    const artistArray = [];
+    const idArray = [];
+    const albumImgArray = [];
+    const { timeRange } = this.state;
+    return new Promise((resolve, reject) => {
+      spotifyWebApi
+        .getMyTopTracks({ limit: 50, time_range: timeRange })
+        .then((data) => {
+          for (let i = 0; i < 50; i += 1) {
+            if (data.items[i] !== undefined) {
+              nameArray.push(data.items[i].name);
+              artistArray.push(data.items[i].artists[0].name);
+              idArray.push(data.items[i].id);
+              albumImgArray.push(data.items[i].album.images[0].url);
             }
-    
-            this.setState({
-              avgBPM: Math.round((bpmSum / 50)),
-              containerDisplay: "container"
-            })
-          })*/
-      })
-  }
+          }
 
-  genreChartMaker(genres) {
-    console.log(genres)
-    var genreCheckbox = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for(var i = 0; i < genres.length; i++) {
-      //check each genre against the genre keywords. Tick the genreCheckBox if applicable. Once done, update state's genre data
-      for(var j = 0; j < 9; j++) {
-        if(genreCheckbox[j] !== 1) {
-          for(var k = 0; k < genreKeywords[j].length; k++) {
-            if(genres[i].indexOf(genreKeywords[j][k]) !== -1) {
+          resolve({
+            topTracks: {
+              names: nameArray,
+              artist: artistArray,
+              ids: idArray,
+              albumImgs: albumImgArray,
+            },
+          });
+        })
+        .catch((error) => reject(error));
+    });
+  };
+
+  genreChartMaker = (genres) => {
+    // console.log(genres)
+    const genreCheckbox = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < genres.length; i += 1) {
+      // check each genre against the genre keywords. Tick the genreCheckBox if applicable. Once done, update state's genre data
+      for (let j = 0; j < 9; j += 1) {
+        if (genreCheckbox[j] !== 1) {
+          for (let k = 0; k < genreKeywords[j].length; k += 1) {
+            if (genres[i].indexOf(genreKeywords[j][k]) !== -1) {
               genreCheckbox[j] = 1;
             }
           }
@@ -219,80 +236,174 @@ class App extends Component {
       }
     }
     return genreCheckbox;
-  }
+  };
 
   changeTerm = (event) => {
-    let term = event.target.value
-    console.log('changing term to ' + term)
+    const term = event.target.value;
     this.setState({
-      timeRange: term
-    })
-
-    this.getTopArtists();
-    this.getTopTracks();
-  }
-
-  changeBackgroundColor(index) {
-    var color = this.state.topArtists.colors[index];
-    console.log(color);
-
-    this.setState({
-      backgroundColor: `rgb(${color.r}, ${color.g}, ${color.b})`
+      timeRange: term,
     });
-  }
+
+    this.fetchData();
+  };
 
   renderGenreData = () => {
-    let genreData = this.state.genreData
-    let indexed = genreData.map((x, idx) => {
-      return {label: this.state.genreLabels[idx], val: x}
-    })
-    indexed.sort((x, y) => {return x.val < y.val ? 1 : x.val == y.val ? 0 : -1});
-    let top = indexed.slice(0,5)
+    const { genreData, genreLabels } = this.state;
+    const indexed = genreData.map((x, idx) => {
+      return { label: genreLabels[idx], val: x };
+    });
+    indexed.sort((x, y) => {
+      return x.val < y.val ? 1 : x.val === y.val ? 0 : -1;
+    });
+    const top = indexed.slice(0, 5);
 
     return top.map((x, idx) => {
-      return <Genre label={x.label} value={x.val} key={idx}></Genre>
-    })
-  }
+      return <Genre label={x.label} value={x.val} key={`genre_${x.label}`} />;
+    });
+  };
+
+  buildGraphNodes = ({ ids, names, albumImgs }) => {
+    return new Promise((resolve) => {
+      const graphNodes = [];
+      ids.forEach((x, index) => {
+        graphNodes.push({
+          id: names[index],
+          svg: albumImgs[index],
+          // img: albumImgs[index],
+        });
+      });
+
+      resolve(graphNodes);
+    });
+  };
+
+  buildGraphLinks = ({ ids, names }) => {
+    return Promise.all(
+      ids.map((element) => spotifyWebApi.getArtistRelatedArtists(element))
+    )
+      .then((data) => {
+        let links = [];
+        data.forEach((element, srcIdx) => {
+          let artistLinks = [];
+          element.artists.forEach((x) => {
+            const artistIndex = ids.indexOf(x.id);
+            // there is a valid link
+            if (artistIndex > 0) {
+              artistLinks.push({
+                source: names[srcIdx],
+                target: names[artistIndex],
+                linkType: true,
+              });
+            }
+          });
+
+          // add a fake link (temporary hack in order for unlinked nodes to not be bunched up in the top left corner)
+          if (artistLinks.length === 0) {
+            artistLinks = [
+              {
+                source: names[srcIdx],
+                target: names[Math.floor(Math.random() * names.length)],
+                opacity: 0.01,
+                linkType: false,
+              },
+            ];
+          }
+          links = [...links, ...artistLinks];
+        });
+
+        return links;
+      })
+      .catch((error) => error);
+  };
+
+  renderArtistGraph = () => {
+    const { renderGraph, graphData } = this.state;
+    if (renderGraph) {
+      return (
+        <div
+          className="graph-container"
+          style={{ height: graphHeight, width: graphWidth }}
+        >
+          <Graph
+            id="artist_graph"
+            data={graphData}
+            config={graphConfig}
+            onMouseOverNode={this.hoverNode}
+          />
+        </div>
+      );
+    }
+    return null;
+  };
+
+  removeFalseLinks = () => {
+    const { graphData } = this.state;
+    this.setState({
+      graphData: {
+        ...graphData,
+        links: graphData.links.filter((link) => {
+          return link.linkType;
+        }),
+      },
+    });
+  };
+
+  renderTopTracks = (n) => {
+    const { topTracks } = this.state;
+    const renderList = [];
+    for (let i = 0; i < n; i += 1) {
+      renderList.push(
+        <Item
+          itemRank={i}
+          itemImage={topTracks.albumImgs[i]}
+          itemName={topTracks.names[i]}
+          itemSubName={topTracks.artist[i]}
+          key={`${i}_track`}
+        />
+      );
+    }
+    return renderList;
+  };
 
   render() {
+    const { userFirstname, displayContent, renderGraph } = this.state;
+
     return (
       <div className="App">
-        
-        <div className="App-title">{this.state.userFirstname == '' ? 'Generate Your' : this.state.userFirstname + '\'s'} <br/>{this.state.month} <br/>Favourites</div>
-          
-        <a className={this.state.loginDisplay} href='https://statifyforspotify-backend.herokuapp.com/login'>
-          <button className="btn btn-primary">Generate</button>
-        </a>
-        <div className="content">
-          <div className={this.state.showcaseDisplay}>
-            <Item itemRank={1}
-                  itemImage={this.state.topTracks.albumImgs[0]} 
-                  itemName={this.state.topTracks.names[0]}
-                  itemSubName={this.state.topTracks.artist[0]} />
-            <Item itemRank={2} 
-                  itemImage={this.state.topTracks.albumImgs[1]} 
-                  itemName={this.state.topTracks.names[1]}
-                  itemSubName={this.state.topTracks.artist[1]} />
-            <Item itemRank={3} 
-                  itemImage={this.state.topTracks.albumImgs[2]} 
-                  itemName={this.state.topTracks.names[2]}
-                  itemSubName={this.state.topTracks.artist[2]} />
-            <Item itemRank={4} 
-                  itemImage={this.state.topTracks.albumImgs[3]} 
-                  itemName={this.state.topTracks.names[3]}
-                  itemSubName={this.state.topTracks.artist[3]} />
-            <Item itemRank={5} 
-                  itemImage={this.state.topTracks.albumImgs[4]} 
-                  itemName={this.state.topTracks.names[4]}
-                  itemSubName={this.state.topTracks.artist[4]} />
+        <div className={displayContent ? 'hidden' : 'login'}>
+          <div className="login-title">Statify</div>
+          <div className="login-description">
+            Get a grasp of your music taste
           </div>
-        
-          <div className={this.state.tastesDisplay}>Your Tastes</div>
-          <div className="genre">{this.renderGenreData()}</div>
-        <div className="footer"></div>
+        </div>
+        <div className={displayContent ? 'App-title' : 'hidden'}>
+          {userFirstname === '' ? 'Your' : `${userFirstname}'s`}
+          <br />
+          Favourites
+        </div>
+
+        <a
+          className={displayContent ? 'hidden' : 'button'}
+          href="http://localhost:8888/login"
+        >
+          <button type="submit" className="btn btn-primary">
+            Generate
+          </button>
+        </a>
+        <div className={displayContent ? 'content' : 'hidden'}>
+          <this.renderArtistGraph render={renderGraph} />
+
+          <div className="showcase">
+            <div className="App-header">Your Current Favorites</div>
+            {displayContent ? this.renderTopTracks(5) : null}
+          </div>
+
+          <div className="genre-container">
+            <div className="App-header">Your Tastes</div>
+            <div className="genre">{this.renderGenreData()}</div>
+          </div>
         </div>
       </div>
-    
     );
   }
 }

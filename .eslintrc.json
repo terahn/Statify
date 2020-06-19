@@ -1,0 +1,31 @@
+{
+  "env": {
+    "browser": true
+  },
+  "settings": {
+    "react": {
+      "version": "999.999.999"
+    }
+  },
+  "root": true,
+  "extends": ["airbnb", "prettier"],
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": 11,
+    "sourceType": "module"
+  },
+  "plugins": ["react", "prettier"],
+  "rules": {
+    "prettier/prettier": "warn",
+    "react/jsx-filename-extension": [
+      1,
+      {
+        "extensions": [".js", ".jsx"]
+      }
+    ],
+    "no-underscore-dangle": "off"
+  }
+}

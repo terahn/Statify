@@ -1,0 +1,41 @@
+.node {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.node-img {
+  background-size: contain;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  border-style: solid;
+  margin: auto;
+  vertical-align: middle;
+  margin-top: 25%;
+}
+
+.node-tooltip {
+  margin-bottom: 5%;
+}
+
+.node-label {
+  text-align: center;
+  padding: 10px;
+  color: white;
+  background-color: black;
+  border-radius: 15px;
+}
+
+.tooltip-arrow {
+  height: 12px;
+  width: 12px;
+  position: absolute;
+  left: 50%;
+  margin-left: -3%;
+  top: 75%;
+  background-color: black;
+  transform: rotateZ(45deg);
+}
