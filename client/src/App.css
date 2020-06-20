@@ -31,8 +31,26 @@ body > #root > div {
   text-transform: uppercase;
 }
 
+.login-logo {
+  width: 50%;
+}
+
+@media (max-width: 1000px) {
+  .login-logo {
+    width: 100%;
+  }
+}
+
+.content-logo {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 25px;
+  height: 50px;
+}
+
 .login {
-  padding: 15% 35% 0 35%;
+  padding: 10% 35% 0 35%;
 }
 
 .login-title {

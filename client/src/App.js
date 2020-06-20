@@ -9,6 +9,7 @@ import {
   graphHeight,
   graphWidth,
 } from './components/Graph.config';
+import logo from './statify-logo.png';
 
 const spotifyWebApi = new Spotify();
 
@@ -371,7 +372,8 @@ class App extends Component {
     return (
       <div className="App">
         <div className={displayContent ? 'hidden' : 'login'}>
-          <div className="login-title">Statify</div>
+          {/* <div className="login-title">Statify</div> */}
+          <img className="login-logo" src={logo} alt="statify logo" />
           <div className="login-description">
             Get a grasp of your music taste
           </div>
@@ -381,6 +383,11 @@ class App extends Component {
           <br />
           Favourites
         </div>
+        <img
+          className={displayContent ? 'content-logo' : 'hidden'}
+          src={logo}
+          alt="statify logo"
+        />
 
         <a
           className={displayContent ? 'hidden' : 'button'}
