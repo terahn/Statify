@@ -130,11 +130,12 @@ body > #root > div {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
   width: 100%;
   height: 100px;
+  overflow: hidden;
 }
 
 .showcase-text {
   font-weight: 300;
-  width: 100%;
+  width: 80%;
   word-break: keep-all;
   padding-left: 20px;
   font-size: 27px;
@@ -142,6 +143,26 @@ body > #root > div {
   margin-left: 100px;
   padding-bottom: 0px;
   margin-top: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 720px) {
+  .showcase-text {
+    font-weight: 300;
+    width: 50%;
+    word-break: keep-all;
+    padding-left: 20px;
+    font-size: 18px;
+    text-align: left;
+    margin-left: 100px;
+    padding-bottom: 0px;
+    margin-top: 18px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 .showcase-sub {
