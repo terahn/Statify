@@ -80,8 +80,8 @@ class App extends Component {
 
     if (params.access_token) {
       spotifyWebApi.setAccessToken(params.access_token);
+      this.fetchData();
     }
-    this.fetchData();
   }
 
   fetchData = async () => {
