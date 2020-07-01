@@ -21,5 +21,5 @@ http://localhost:3000/
 ```
 
 ## Screenshots
-![Alt text](https://i.imgur.com/YmaSMT2.png)
-![Alt text](https://i.imgur.com/cW9dYHb.png)
+![Alt text](https://i.imgur.com/No9JngQ.gif)
+![Top tracks](https://i.imgur.com/oAATmny.png)
