@@ -2,6 +2,8 @@
 
 A web app for viewing your Spotify stats
 
+![artist graph gif](https://i.imgur.com/No9JngQ.gif)
+
 ## Running locally
 ### Start backend on port 8888
 ```
@@ -21,5 +23,5 @@ http://localhost:3000/
 ```
 
 ## Screenshots
-![Alt text](https://i.imgur.com/YmaSMT2.png)
-![Alt text](https://i.imgur.com/cW9dYHb.png)
+![artist graph](https://i.imgur.com/j796ANS.png)
+![Top tracks](https://i.imgur.com/oAATmny.png)
