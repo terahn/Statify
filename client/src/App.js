@@ -2,6 +2,30 @@ import React, { Component } from 'react';
 import './App.css';
 import Spotify from 'spotify-web-api-js';
 import { Graph } from 'react-d3-graph';
+import {
+  Typography,
+  Button,
+  Card,
+  CardHeader,
+  CardActions,
+  CardActionArea,
+  CardMedia,
+  IconButton,
+  CardContent,
+  Collapse,
+  List,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormControl,
+  Select,
+  InputLabel,
+  MenuItem,
+  DialogContentText,
+  DialogActions,
+} from '@material-ui/core';
+import { InfoOutlined, Refresh } from '@material-ui/icons';
+import { AnimatePresence, motion } from 'framer-motion';
 import Item from './components/Item';
 import Genre from './components/Genre';
 import {
@@ -38,14 +62,24 @@ const genreKeywords = [
   ['hip hop', 'rap'],
 ];
 
+const cardSlide = {
+  initial: { x: -100, opacity: 0 },
+  animate: { x: 0, opacity: 1 },
+  exit: { x: -100, opacity: 0 },
+};
+
 class App extends Component {
   constructor() {
     super();
     const params = this.getHashParams();
+    const hasAccessToken = Object.prototype.hasOwnProperty.call(
+      params,
+      'access_token'
+    );
     this.state = {
       timeRange: 'medium_term',
-      loginDisplay: 'button',
       displayContent: false,
+      hasAccessToken,
       userFirstname: '',
       topArtists: {
         names: [],
@@ -76,6 +110,8 @@ class App extends Component {
         links: [],
       },
       renderGraph: false,
+      selectedNode: '',
+      modalOpen: false,
     };
 
     if (params.access_token) {
@@ -85,25 +121,30 @@ class App extends Component {
   }
 
   fetchData = async () => {
+    const { renderGraph } = this.state;
+    if (renderGraph) {
+      this.setState({
+        renderGraph: false,
+      });
+    }
     const name = await this.getUserInfo();
     const { topTracks } = await this.getTopTracks();
     const {
       topArtists,
       genreData,
-      loginDisplay,
       displayContent,
     } = await this.getTopArtists();
     const graphNodes = await this.buildGraphNodes(topArtists);
     const graphLinks = await this.buildGraphLinks(topArtists);
     this.setState((prevState) => ({
       ...prevState,
-      loginDisplay,
       displayContent,
       userFirstname: name[0],
       topArtists,
       topTracks,
       genreData,
       graphData: {
+        // nodes: this.decorateGraphNodesWithInitialPositioning(graphNodes),
         nodes: graphNodes,
         links: graphLinks,
       },
@@ -182,7 +223,6 @@ class App extends Component {
               topGenres: genreArray,
             },
             genreData,
-            loginDisplay: 'hidden',
             displayContent: true,
           });
         })
@@ -241,12 +281,15 @@ class App extends Component {
   };
 
   changeTerm = (event) => {
-    const term = event.target.value;
-    this.setState({
-      timeRange: term,
-    });
+    const { timeRange } = this.state;
+    const newValue = event.target.value;
+    if (timeRange !== newValue) {
+      this.setState({
+        timeRange: newValue,
+      });
 
-    this.fetchData();
+      this.fetchData();
+    }
   };
 
   renderGenreData = () => {
@@ -270,8 +313,8 @@ class App extends Component {
       ids.forEach((x, index) => {
         graphNodes.push({
           id: names[index],
-          svg: albumImgs[index],
-          // img: albumImgs[index],
+          // svg: albumImgs[index],
+          img: albumImgs[index],
         });
       });
 
@@ -310,6 +353,7 @@ class App extends Component {
               },
             ];
           }
+
           links = [...links, ...artistLinks];
         });
 
@@ -318,24 +362,18 @@ class App extends Component {
       .catch((error) => error);
   };
 
-  renderArtistGraph = () => {
-    const { renderGraph, graphData } = this.state;
-    if (renderGraph) {
-      return (
-        <div
-          className="graph-container"
-          style={{ height: graphHeight, width: graphWidth }}
-        >
-          <Graph
-            id="artist_graph"
-            data={graphData}
-            config={graphConfig}
-            onMouseOverNode={this.hoverNode}
-          />
-        </div>
-      );
-    }
-    return null;
+  decorateGraphNodesWithInitialPositioning = (nodes) => {
+    return nodes.map((n) => ({
+      ...n,
+      x: n.x || Math.floor(Math.random() * 1000),
+      y: n.y || Math.floor(Math.random() * 1000),
+    }));
+  };
+
+  onClickNode = (nodeId) => {
+    this.setState({
+      selectedNode: nodeId,
+    });
   };
 
   removeFalseLinks = () => {
@@ -356,7 +394,7 @@ class App extends Component {
     for (let i = 0; i < n; i += 1) {
       renderList.push(
         <Item
-          itemRank={i}
+          itemRank={i + 1}
           itemImage={topTracks.albumImgs[i]}
           itemName={topTracks.names[i]}
           itemSubName={topTracks.artist[i]}
@@ -367,51 +405,208 @@ class App extends Component {
     return renderList;
   };
 
+  renderSelectedCard = (nodeId) => {
+    const { graphData, topArtists } = this.state;
+    try {
+      const artistImg = graphData.nodes.find((node) => node.id === nodeId).img;
+      const artistId = 'PUT SOMETHING HERE';
+      const connections = [];
+      graphData.links.forEach((link) => {
+        if (link.source === nodeId) {
+          connections.push(link.target);
+        } else if (link.target === nodeId) {
+          connections.push(link.source);
+        }
+      });
+      const uniqueConnections = new Set(connections);
+      return (
+        <motion.div
+          variants={cardSlide}
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          className="selected-card"
+        >
+          <Card>
+            <CardMedia
+              image={artistImg}
+              title="Artist Image"
+              className="selected-card-img"
+            />
+            <CardContent className="content-left">
+              <Typography gutterBottom variant="h5" component="h2">
+                {nodeId}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" component="p">
+                {uniqueConnections.size !== 1
+                  ? `${uniqueConnections.size} connections`
+                  : '1 connection'}
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button
+                size="small"
+                color="primary"
+                href={`https://open.spotify.com/artist/${artistId}`}
+                target="_blank"
+              >
+                View On Spotify
+              </Button>
+              <Button size="small" color="primary">
+                View All Related Artists
+              </Button>
+            </CardActions>
+          </Card>
+        </motion.div>
+      );
+    } catch (e) {
+      console.warn(e);
+      return null;
+    }
+  };
+
+  openModal = () => {
+    this.setState({
+      modalOpen: true,
+    });
+  };
+
+  closeModal = () => {
+    this.setState({
+      modalOpen: false,
+    });
+  };
+
   render() {
-    const { userFirstname, displayContent, renderGraph } = this.state;
+    const {
+      userFirstname,
+      displayContent,
+      renderGraph,
+      selectedNode,
+      timeRange,
+      graphData,
+      hasAccessToken,
+      modalOpen,
+    } = this.state;
 
     return (
-      <div className="App">
-        <div className={displayContent ? 'hidden' : 'login'}>
-          {/* <div className="login-title">Statify</div> */}
-          <img className="login-logo" src={logo} alt="statify logo" />
-          <div className="login-description">
-            Get a grasp of your music taste
-          </div>
-        </div>
-        <div className={displayContent ? 'App-title' : 'hidden'}>
-          {userFirstname === '' ? 'Your' : `${userFirstname}'s`}
-          <br />
-          Favourites
-        </div>
-        <img
-          className={displayContent ? 'content-logo' : 'hidden'}
-          src={logo}
-          alt="statify logo"
-        />
+      <AnimatePresence>
+        <div className="App">
+          {!displayContent && !hasAccessToken && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="login"
+            >
+              {/* <div className="login-title">Statify</div> */}
+              <img className="login-logo" src={logo} alt="statify logo" />
+              <div className="login-description">
+                Get a grasp of your music taste
+              </div>
+              <a
+                href="http://localhost:8888/login"
+                style={{ textDecoration: 'none' }}
+              >
+                <Button variant="contained" color="primary">
+                  Generate
+                </Button>
+              </a>
+            </motion.div>
+          )}
+          {displayContent && (
+            <motion.div
+              animate="animate"
+              initial="initial"
+              variants={cardSlide}
+              className="card"
+            >
+              <Card>
+                <CardHeader
+                  className="content-left"
+                  title={
+                    userFirstname === ''
+                      ? 'Your'
+                      : `${userFirstname}'s Favourites`
+                  }
+                />
+                <CardActions>
+                  <IconButton onClick={this.openModal}>
+                    <InfoOutlined />
+                  </IconButton>
+                  <IconButton onClick={this.fetchData}>
+                    <Refresh />
+                  </IconButton>
+                </CardActions>
+                <CardContent className="content-left">
+                  <FormControl className="timeRange content-left">
+                    <InputLabel>Time Range</InputLabel>
+                    <Select value={timeRange} onChange={this.changeTerm}>
+                      <MenuItem value="short_term">Short</MenuItem>
+                      <MenuItem value="medium_term">Medium</MenuItem>
+                      <MenuItem value="long_term">Long</MenuItem>
+                    </Select>
+                  </FormControl>
+                </CardContent>
 
-        <a
-          className={displayContent ? 'hidden' : 'button'}
-          href="http://localhost:8888/login"
-        >
-          <button type="submit" className="btn btn-primary">
-            Generate
-          </button>
-        </a>
-        <div className={displayContent ? 'content' : 'hidden'}>
-          <this.renderArtistGraph render={renderGraph} />
-
-          <div className="showcase">
-            <div className="App-header">Your Current Favorites</div>
-            {displayContent ? this.renderTopTracks(5) : null}
-          </div>
-
-          <div className="genre-container">
+                {/* <div className="genre-container">
             <div className="App-header">Your Tastes</div>
             <div className="genre">{this.renderGenreData()}</div>
-          </div>
+          </div> */}
+              </Card>
+            </motion.div>
+          )}
+          <Dialog onClose={this.closeModal} open={modalOpen} fullWidth>
+            <DialogTitle>About</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Statify allows you to view the connections between your favorite
+                artists. All data is pulled from the Spotify API.
+                <br />
+                <br />
+                Controls:
+                <ul>
+                  <li>
+                    Click a node to
+                    <b> view more info</b>
+                  </li>
+                  <li>
+                    Click and drag to
+                    <b> move around</b>
+                  </li>
+                  <li>
+                    Scroll up to
+                    <b> zoom in</b>
+                  </li>
+                  <li>
+                    Scroll down to
+                    <b> zoom out</b>
+                  </li>
+                </ul>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                color="primary"
+                href="https://github.com/terahn/Statify"
+                target="_blank"
+              >
+                View on GitHub
+              </Button>
+            </DialogActions>
+          </Dialog>
+          {selectedNode !== '' ? this.renderSelectedCard(selectedNode) : null}
+
+          {renderGraph && (
+            <Graph
+              id="artist_graph"
+              data={graphData}
+              config={graphConfig}
+              onClickNode={this.onClickNode}
+            />
+          )}
         </div>
-      </div>
+      </AnimatePresence>
     );
   }
 }

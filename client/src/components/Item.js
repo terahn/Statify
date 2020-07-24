@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { ListItem, ListItemText } from '@material-ui/core';
 
 const Item = ({ itemRank, itemImage, itemName, itemSubName }) => {
   Item.propTypes = {
@@ -10,17 +11,15 @@ const Item = ({ itemRank, itemImage, itemName, itemSubName }) => {
   };
 
   return (
-    <div className="showcase-object">
-      <div className="showcase-item">
-        <img
-          className="showcase-img"
-          src={itemImage}
-          alt={`${itemName} album cover`}
-        />
-        <div className="showcase-text">{itemName}</div>
-        <div className="showcase-sub">{itemSubName}</div>
-      </div>
-    </div>
+    <ListItem>
+      <div className="list-rank">{itemRank}</div>
+      <img
+        className="showcase-img"
+        src={itemImage}
+        alt={`${itemName} album cover`}
+      />
+      <ListItemText primary={itemName} secondary={itemSubName} />
+    </ListItem>
   );
 };
 

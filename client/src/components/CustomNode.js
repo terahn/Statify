@@ -11,7 +11,7 @@ const CustomNode = ({ artist }) => {
   };
 
   return (
-    <div className="node">
+    <div className="node-container">
       <div
         className="node-img"
         style={{ backgroundImage: `url(${artist.img})` }}

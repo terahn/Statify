@@ -4,17 +4,33 @@ body > #root > div {
 
 .App {
   text-align: center;
-  font-family: 'Helvetica Neue', 'Arial', 'Sans Serif';
+  font-family: 'Roboto', 'Helvetica Neue', 'Arial', 'Sans Serif';
   /*background: linear-gradient(110deg, #ff5722 60%, #c41c00 60%);*/
   height: 100%;
   margin: 0 auto;
   /* width: 50%; */
 }
 
+.card {
+  width: 400px;
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  max-height: 65%;
+}
+
+.selected-card {
+  width: 400px;
+  position: absolute;
+  left: 25px;
+  bottom: 25px;
+  max-height: 80%;
+}
+
 @media (max-width: 1000px) {
   .App {
     text-align: center;
-    font-family: 'Helvetica Neue', 'Arial', 'Sans Serif';
+    font-family: 'Roboto', 'Helvetica Neue', 'Arial', 'Sans Serif';
     /*background: linear-gradient(110deg, #ff5722 60%, #c41c00 60%);*/
     height: 100%;
     margin: 0 auto;
@@ -24,11 +40,6 @@ body > #root > div {
 
 .App-title {
   text-align: left;
-  font-size: 2em;
-  color: black;
-  font-weight: 800;
-  padding: 25px;
-  text-transform: uppercase;
 }
 
 .login-logo {
@@ -68,38 +79,6 @@ body > #root > div {
 
 .App-header {
   text-align: left;
-  font-size: 2em;
-  color: black;
-  font-weight: 800;
-  padding: 25px 0 25px 0;
-  text-transform: uppercase;
-}
-
-.btn {
-  height: 30px;
-  width: 85px;
-  border-radius: 2px;
-  border: 0;
-  transition: 0.2s ease-out;
-  color: #fff;
-  margin: 6px;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.16), 0 2px 10px 0 rgba(0, 0, 0, 0.12);
-}
-
-.btn:hover {
-  color: #fff;
-  box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.18), 0 4px 15px 0 rgba(0, 0, 0, 0.15);
-}
-
-.btn:active,
-.btn:focus,
-.btn.active {
-  outline: 0;
-  color: #fff;
-}
-
-.btn-primary {
-  background: black;
 }
 
 .hidden {
@@ -107,8 +86,9 @@ body > #root > div {
 }
 
 .showcase {
-  width: 75%;
   margin: auto;
+  animation-name: dropdown;
+  animation-duration: 4s;
 }
 
 .showcase-header {
@@ -116,7 +96,6 @@ body > #root > div {
   font-size: 2em;
   color: black;
   font-weight: 800;
-  padding: 25px;
   padding-bottom: 0;
 }
 
@@ -125,61 +104,36 @@ body > #root > div {
 }
 
 .showcase-item {
-  margin: 10px 0 10px 0;
-  background-color: white;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  height: 70px;
   width: 100%;
-  height: 100px;
-  overflow: hidden;
 }
 
 .showcase-text {
   font-weight: 300;
-  width: 80%;
   word-break: keep-all;
-  padding-left: 20px;
-  font-size: 27px;
+  padding-left: 15px;
+  font-size: 18px;
   text-align: left;
-  margin-left: 100px;
-  padding-bottom: 0px;
-  margin-top: 18px;
+  padding-top: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-@media (max-width: 720px) {
-  .showcase-text {
-    font-weight: 300;
-    width: 50%;
-    word-break: keep-all;
-    padding-left: 20px;
-    font-size: 18px;
-    text-align: left;
-    margin-left: 100px;
-    padding-bottom: 0px;
-    margin-top: 18px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
 .showcase-sub {
   font-weight: bold;
   text-align: left;
-  margin-left: 100px;
-  padding-left: 20px;
-  padding-top: 0px;
-  font-size: 18px;
+  padding-left: 15px;
+  margin-left: 70px;
+  font-size: 16px;
 }
 
 .showcase-img {
-  display: inline-block;
   float: left;
   position: relative;
-  height: 100%;
   object-fit: cover;
+  width: 70px;
+  padding-right: 10px;
 }
 
 .showcase-name {
@@ -189,5 +143,40 @@ body > #root > div {
 
 .graph-container {
   margin: auto;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  /* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23); */
+}
+
+.list {
+  max-height: 230px;
+  overflow: auto;
+}
+
+.list-rank {
+  width: 10px;
+  height: 70px;
+  padding-right: 15px;
+}
+
+.selected-card-img {
+  height: 150px;
+}
+
+.expand {
+  transform: rotate(0deg);
+  margin-left: auto;
+}
+.expanded {
+  transform: rotate(180deg);
+}
+
+.content-left {
+  text-align: left;
+}
+
+.settingsDialog {
+  width: 300px;
+}
+
+.timeRange {
+  min-width: 120px !important;
 }

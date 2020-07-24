@@ -1,11 +1,11 @@
 import React from 'react';
 import CustomNode from './CustomNode';
 
-export const graphHeight = window.innerHeight * 0.75;
-export const graphWidth = window.innerWidth * 0.75;
+export const graphHeight = window.innerHeight;
+export const graphWidth = window.innerWidth;
 
 export const graphConfig = {
-  automaticRearrangeAfterDropNode: false,
+  automaticRearrangeAfterDropNode: true,
   collapsible: false,
   directed: false,
   focusAnimationDuration: 0.75,
@@ -23,7 +23,7 @@ export const graphConfig = {
   width: graphWidth,
   d3: {
     alphaTarget: 0.05,
-    gravity: -800,
+    gravity: -2000,
     linkLength: 300,
     linkStrength: 1,
     disableLinkForce: false,
@@ -41,8 +41,8 @@ export const graphConfig = {
     labelPosition: 'right',
     mouseCursor: 'pointer',
     opacity: 1,
-    renderLabel: true,
-    size: 350,
+    renderLabel: false,
+    size: 1000,
     strokeColor: 'none',
     strokeWidth: 1.5,
     svg: '',
@@ -61,7 +61,7 @@ export const graphConfig = {
     opacity: 1,
     renderLabel: false,
     semanticStrokeWidth: false,
-    strokeWidth: 4,
+    strokeWidth: 6,
     markerHeight: 6,
     markerWidth: 6,
   },

@@ -1,4 +1,4 @@
-.node {
+.node-container {
   height: 100%;
   width: 100%;
   display: flex;
@@ -8,25 +8,27 @@
 
 .node-img {
   background-size: contain;
-  width: 40%;
-  height: 40%;
+  width: 90%;
+  height: 90%;
   border-radius: 50%;
   border-style: solid;
   margin: auto;
   vertical-align: middle;
-  margin-top: 25%;
-}
-
-.node-tooltip {
-  margin-bottom: 5%;
 }
 
 .node-label {
+  position: absolute;
+  position: absolute;
+  left: 50%;
+  top: 110%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
   text-align: center;
   padding: 10px;
   color: white;
   background-color: black;
   border-radius: 15px;
+  white-space: nowrap;
 }
 
 .tooltip-arrow {
@@ -34,8 +36,17 @@
   width: 12px;
   position: absolute;
   left: 50%;
-  margin-left: -3%;
-  top: 75%;
+  margin-left: -6%;
+  top: 105%;
   background-color: black;
   transform: rotateZ(45deg);
+}
+
+/* Make graph overflow */
+g foreignObject {
+  overflow: visible;
+}
+
+g svg {
+  overflow: visible;
 }
