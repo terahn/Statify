@@ -25,6 +25,7 @@ import {
   DialogActions,
 } from '@material-ui/core';
 import { InfoOutlined, Refresh } from '@material-ui/icons';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { AnimatePresence, motion } from 'framer-motion';
 import Item from './components/Item';
 import Genre from './components/Genre';
@@ -42,6 +43,14 @@ const cardSlide = {
   animate: { x: 0, opacity: 1 },
   exit: { x: -100, opacity: 0 },
 };
+
+const muiTheme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#1ed760',
+    },
+  },
+});
 
 class App extends Component {
   constructor() {
@@ -401,19 +410,21 @@ class App extends Component {
               exit={{ opacity: 0 }}
               className="login"
             >
+              <ThemeProvider theme={muiTheme}>
+                <img className="login-logo" src={logo} alt="statify logo" />
+                <div className="login-description">
+                  Get a grasp of your music taste
+                </div>
+                <a
+                  href="http://localhost:8888/login"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <Button variant="contained" color="primary">
+                    Generate
+                  </Button>
+                </a>
+              </ThemeProvider>
               {/* <div className="login-title">Statify</div> */}
-              <img className="login-logo" src={logo} alt="statify logo" />
-              <div className="login-description">
-                Get a grasp of your music taste
-              </div>
-              <a
-                href="http://localhost:8888/login"
-                style={{ textDecoration: 'none' }}
-              >
-                <Button variant="contained" color="primary">
-                  Generate
-                </Button>
-              </a>
             </motion.div>
           )}
           {displayContent && (
