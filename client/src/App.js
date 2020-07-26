@@ -24,7 +24,8 @@ import {
   DialogContentText,
   DialogActions,
 } from '@material-ui/core';
-import { InfoOutlined, Refresh } from '@material-ui/icons';
+import InfoOutlined from '@material-ui/icons/InfoOutlined';
+import Refresh from '@material-ui/icons/Refresh';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { AnimatePresence, motion } from 'framer-motion';
 import Item from './components/Item';
