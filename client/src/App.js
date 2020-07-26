@@ -424,7 +424,6 @@ class App extends Component {
                   </Button>
                 </a>
               </ThemeProvider>
-              {/* <div className="login-title">Statify</div> */}
             </motion.div>
           )}
           {displayContent && (
@@ -461,11 +460,6 @@ class App extends Component {
                     </Select>
                   </FormControl>
                 </CardContent>
-
-                {/* <div className="genre-container">
-            <div className="App-header">Your Tastes</div>
-            <div className="genre">{this.renderGenreData()}</div>
-          </div> */}
               </Card>
             </motion.div>
           )}
