@@ -14,8 +14,9 @@ var cookieParser = require('cookie-parser');
 
 var client_id = '86c9f7a39dc449bc84cfa8922742a85d'; // Your client id
 var client_secret = 'fdd640f620ae41b1b8555f531378bc49'; // Your secret
-// var redirect_uri = 'https://statifyforspotify-backend.herokuapp.com/callback'; // Your redirect uri FOR DEPLOYMENT
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri FOR TESTING
+const REDIRECT_URI =
+  process.env.REDIRECT_URI || 'http://localhost:8888/callback';
+const REDIRECT_URL = process.env.REDIRECT_URL || 'http://localhost:3000/#';
 
 /**
  * Generates a random string containing numbers and letters
@@ -51,7 +52,7 @@ app.get('/login', function (req, res) {
         response_type: 'code',
         client_id: client_id,
         scope: scope,
-        redirect_uri: redirect_uri,
+        redirect_uri: REDIRECT_URI,
         state: state,
       })
   );
@@ -78,7 +79,7 @@ app.get('/callback', function (req, res) {
       url: 'https://accounts.spotify.com/api/token',
       form: {
         code: code,
-        redirect_uri: redirect_uri,
+        redirect_uri: REDIRECT_URI,
         grant_type: 'authorization_code',
       },
       headers: {
@@ -105,12 +106,8 @@ app.get('/callback', function (req, res) {
           console.log(body);
         });
 
-        // we can also pass the token to the browser to make requests from there
-        // redirect_url = 'https://statifyforspotify.herokuapp.com/#'
-        redirect_url = 'http://localhost:3000/#';
-
         res.redirect(
-          redirect_url +
+          REDIRECT_URL +
             querystring.stringify({
               access_token: access_token,
               refresh_token: refresh_token,

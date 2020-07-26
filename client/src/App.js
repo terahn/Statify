@@ -38,6 +38,8 @@ import logo from './statify-logo.png';
 
 const spotifyWebApi = new Spotify();
 
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8888/login';
+
 const cardSlide = {
   initial: { x: -100, opacity: 0 },
   animate: { x: 0, opacity: 1 },
@@ -415,10 +417,7 @@ class App extends Component {
                 <div className="login-description">
                   Get a grasp of your music taste
                 </div>
-                <a
-                  href="http://localhost:8888/login"
-                  style={{ textDecoration: 'none' }}
-                >
+                <a href={BACKEND_URL} style={{ textDecoration: 'none' }}>
                   <Button variant="contained" color="primary">
                     Generate
                   </Button>
