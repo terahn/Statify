@@ -39,7 +39,8 @@ import logo from './statify-logo.png';
 
 const spotifyWebApi = new Spotify();
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8888/login';
+const BACKEND_URL =
+  process.env.REACT_APP_BACKEND_URL || 'http://localhost:8888/login';
 
 const cardSlide = {
   initial: { x: -100, opacity: 0 },
