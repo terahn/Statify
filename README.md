@@ -1,6 +1,8 @@
 # Statify for Spotify
 
-A web app for viewing your Spotify stats
+A React web app for visualizing your favorite Spotify artists
+
+#### Check out the live demo [here](https://statifyforspotify.herokuapp.com/)!
 
 ![artist graph gif](https://i.imgur.com/z2hWnrL.gif)
 
