@@ -338,13 +338,13 @@ class App extends Component {
               >
                 View On Spotify
               </Button>
-              {/* <Button
+              <Button
                 size="small"
                 color="primary"
                 onClick={() => this.viewRelatedArtists(artist)}
               >
                 View All Related Artists
-              </Button> */}
+              </Button>
             </CardActions>
           </Card>
         </motion.div>
@@ -356,25 +356,38 @@ class App extends Component {
   };
 
   viewRelatedArtists = async (selectedArtist) => {
-    const { currentArtists } = this.state;
-    const artists = selectedArtist.relatedArtists.concat(currentArtists);
+    this.setState((prevState) => ({
+      graphData: {
+        nodes: prevState.graphData.nodes.filter(
+          (node) => node.id === selectedArtist.name
+        ),
+        links: [],
+      },
+    }));
+    const artists = [selectedArtist];
+    const links = [];
+    if (
+      Object.prototype.hasOwnProperty.call(selectedArtist, 'relatedArtists')
+    ) {
+      selectedArtist.relatedArtists.forEach((artist) => {
+        links.push({ source: selectedArtist.name, target: artist.name });
+        artists.push(artist);
+      });
+    } else {
+      const fetchedArtistsData = await spotifyWebApi.getArtistRelatedArtists(
+        selectedArtist.id
+      );
+      fetchedArtistsData.artists.forEach((artist) => {
+        links.push({ source: selectedArtist.name, target: artist.name });
+        artists.push(artist);
+      });
+    }
     const graphNodes = await this.buildGraphNodes(artists);
-    const [graphLinks, relatedArtists] = await this.buildGraphLinks(
-      artists,
-      false
-    );
-    artists.forEach((artist, index) => {
-      artist.relatedArtists = relatedArtists[index].artists;
-    });
-    const filteredLinks = graphLinks.filter(
-      (link) =>
-        currentArtists.find((artist) => artist.name === link.source) ||
-        currentArtists.find((artist) => artist.name === link.target)
-    );
+
     this.setState({
       graphData: {
-        nodes: graphNodes,
-        links: Array.from(new Set(filteredLinks)),
+        nodes: graphNodes.slice(0, 11),
+        links: links.slice(0, 10),
       },
       currentArtists: artists,
     });
