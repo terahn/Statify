@@ -24,7 +24,7 @@ export const graphConfig = {
   d3: {
     alphaTarget: 0.05,
     gravity: -2000,
-    linkLength: 300,
+    linkLength: 200,
     linkStrength: 1,
     disableLinkForce: false,
   },
