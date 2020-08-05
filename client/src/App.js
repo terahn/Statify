@@ -8,12 +8,9 @@ import {
   Card,
   CardHeader,
   CardActions,
-  CardActionArea,
   CardMedia,
   IconButton,
   CardContent,
-  Collapse,
-  List,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,6 +20,7 @@ import {
   MenuItem,
   DialogContentText,
   DialogActions,
+  Snackbar,
 } from '@material-ui/core';
 import InfoOutlined from '@material-ui/icons/InfoOutlined';
 import Refresh from '@material-ui/icons/Refresh';
@@ -78,6 +76,7 @@ class App extends Component {
       renderGraph: false,
       selectedNode: '',
       modalOpen: false,
+      error: '',
     };
 
     if (params.access_token) {
@@ -93,42 +92,52 @@ class App extends Component {
         renderGraph: false,
       });
     }
-    const name = await this.getUserInfo();
-    // const { topTracks } = await this.getTopTracks();
-    const { topArtists } = await this.getTopArtists();
-    const graphNodes = await this.buildGraphNodes(topArtists);
-    const [graphLinks, relatedArtists] = await this.buildGraphLinks(topArtists);
-    topArtists.forEach((artist, index) => {
-      artist.relatedArtists = relatedArtists[index].artists;
-    });
-    this.setState((prevState) => ({
-      ...prevState,
-      displayContent: true,
-      userFirstname: name[0],
-      currentArtists: topArtists,
-      // topTracks,
-      graphData: {
-        // nodes: this.decorateGraphNodesWithInitialPositioning(graphNodes),
-        nodes: graphNodes,
-        links: graphLinks,
-      },
-      renderGraph: true,
-    }));
-    setTimeout(() => {
-      this.removeFalseLinks();
-    }, 2000);
+    try {
+      const name = await this.getUserInfo();
+      // const { topTracks } = await this.getTopTracks();
+      const { topArtists } = await this.getTopArtists();
+      const graphNodes = await this.buildGraphNodes(topArtists);
+      const [graphLinks, relatedArtists] = await this.buildGraphLinks(
+        topArtists
+      );
+      topArtists.forEach((artist, index) => {
+        artist.relatedArtists = relatedArtists[index].artists;
+      });
+      this.setState((prevState) => ({
+        ...prevState,
+        displayContent: true,
+        userFirstname: name[0],
+        currentArtists: topArtists,
+        // topTracks,
+        graphData: {
+          // nodes: this.decorateGraphNodesWithInitialPositioning(graphNodes),
+          nodes: graphNodes,
+          links: graphLinks,
+        },
+        renderGraph: true,
+      }));
+      setTimeout(() => {
+        this.removeFalseLinks();
+      }, 2000);
+    } catch (error) {
+      window.location.replace(BACKEND_URL);
+    }
   };
 
   getHashParams = () => {
-    const hashParams = {};
-    let e;
-    const r = /([^&;=]+)=?([^&;]*)/g;
-    const q = window.location.hash.substring(1);
-    // eslint-disable-next-line no-cond-assign
-    while ((e = r.exec(q))) {
-      hashParams[e[1]] = decodeURIComponent(e[2]);
+    try {
+      const hashParams = {};
+      let e;
+      const r = /([^&;=]+)=?([^&;]*)/g;
+      const q = window.location.hash.substring(1);
+      // eslint-disable-next-line no-cond-assign
+      while ((e = r.exec(q))) {
+        hashParams[e[1]] = decodeURIComponent(e[2]);
+      }
+      return hashParams;
+    } catch (error) {
+      this.setState({ error: 'Could not fetch data from Spotify' });
     }
-    return hashParams;
   };
 
   getUserInfo = () => {
@@ -333,6 +342,13 @@ class App extends Component {
               <Button
                 size="small"
                 color="primary"
+                onClick={() => this.playArtist(artist)}
+              >
+                Play
+              </Button>
+              <Button
+                size="small"
+                color="primary"
                 href={artistUrl}
                 target="_blank"
               >
@@ -343,7 +359,7 @@ class App extends Component {
                 color="primary"
                 onClick={() => this.viewRelatedArtists(artist)}
               >
-                View All Related Artists
+                View Related Artists
               </Button>
             </CardActions>
           </Card>
@@ -393,6 +409,14 @@ class App extends Component {
     });
   };
 
+  playArtist = (artist) => {
+    spotifyWebApi.play({ context_uri: artist.uri }).catch((err) =>
+      this.setState({
+        error: 'No active device found',
+      })
+    );
+  };
+
   openModal = () => {
     this.setState({
       modalOpen: true,
@@ -402,6 +426,12 @@ class App extends Component {
   closeModal = () => {
     this.setState({
       modalOpen: false,
+    });
+  };
+
+  closeError = () => {
+    this.setState({
+      error: '',
     });
   };
 
@@ -415,6 +445,7 @@ class App extends Component {
       graphData,
       hasAccessToken,
       modalOpen,
+      error,
     } = this.state;
 
     return (
@@ -517,7 +548,12 @@ class App extends Component {
             </DialogActions>
           </Dialog>
           {selectedNode !== '' ? this.renderSelectedCard(selectedNode) : null}
-
+          <Snackbar
+            open={error !== ''}
+            autoHideDuration={6000}
+            onClose={this.closeError}
+            message={error}
+          />
           {renderGraph && (
             <Graph
               id="artist_graph"
