@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "cd client && npm start"
+    "start": "cd client && npm start",
+    "publishclient": "git push heroku `git subtree split --prefix client master`:master",
+    "publishserver": "git push heroku-backend `git subtree split --prefix auth-server master`:master"
   },
   "devDependencies": {
     "eslint": "^7.3.0",
